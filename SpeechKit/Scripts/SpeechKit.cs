@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
-using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -10,7 +9,7 @@ namespace Obel.SpeechKitTool
 {
     public class SpeechKit : MonoBehaviour
     {
-        // https://cloud.yandex.ru/docs/iam/operations/iam-token/create - get IAM TOKEN //
+        #region Synthesis properties
 
         public enum SPLang { ru, en, tr }
         [SerializeField, Header("Voice")] private SPLang lang;
@@ -32,26 +31,65 @@ namespace Obel.SpeechKitTool
         private string[] speeds = new string[] { "1.0", "1.25", "1.5", "0.75", "0.5" };
         public string Speed => speeds[(int)speed];
 
-        [SerializeField, TextArea] private string textToVoice;
+        public enum SPCodec { PCM, opus }
+        [SerializeField] private SPCodec codec;
+        private string[] codecs = new string[] { "lpcm", "oggopus" };
+        public string Codec => codecs[(int)codec];
+
+        #endregion
+
+        #region Input and Output properties
+
+        [SerializeField, Space, TextArea] private string textToVoice;
         public string TextToVoice { set => textToVoice = value; get => textToVoice; }
 
-        [Header("API"), SerializeField] private string folderID;
+        public enum StorageMode { files, memory }
+        [Tooltip("Store files and use onDoneFiles event or pass received bytes to onDoneBytes event")]
+        public StorageMode storageMode;
+
+        #endregion
+
+        #region API connection properties
+
+        public enum AuthMode { IAMToken, APIKey }
+        [Header("API")] public AuthMode authMode;
+
+        [SerializeField, Tooltip("Paste here your IAMToken or API-Key if you using service account")]
+        private string authCode;
+        public string AuthCode { set => authCode = value; get => authCode; }
+
+        [SerializeField, Tooltip("Paste here folder ID if you using IAMToken for authorization. Keep clear if not")]
+        private string folderID;
         public string FolderID { set => folderID = value; get => folderID; }
 
-        [SerializeField, TextArea] private string iamToken;
-        public string IamToken { set => iamToken = value; get => iamToken; }
+        #endregion
+
+        #region Result events
 
         [Serializable] public class UnityEventString : UnityEvent<string> { }
+        [Serializable] public class UnityEventBytes : UnityEvent<byte[]> { }
+
         [Header("Events")]
-        public UnityEventString onDone;
+        public UnityEventString onDoneFile;
+        public UnityEventBytes onDoneBytes;
         public UnityEvent onError;
-        private string doneResult = string.Empty;
-        private string errorResult = string.Empty;
+
+        #endregion
+
+        #region Debug properties
 
         [Space]
-        public bool showDebugMessages; 
+        public bool showDebugMessages;
+
+        #endregion
+
+        #region Public methods
 
         public void TryToSpeak() => Speech();
+
+        #endregion
+
+        #region Private methods
 
         private async void Speech()
         {
@@ -59,32 +97,39 @@ namespace Obel.SpeechKitTool
 
             string loadedFileName = "";
 
-            await Task.Run(async () =>
+            HttpClient client = new HttpClient();
+
+            try
             {
-                HttpClient client = new HttpClient();
+                if (showDebugMessages) Debug.Log("[SpeatchKit] Authorization");
 
-                try
+                client.DefaultRequestHeaders.Add("Authorization", (authMode == AuthMode.APIKey ? "Api-Key " : "Bearer ") + AuthCode);
+
+                var values = new Dictionary<string, string>
                 {
-                    if (showDebugMessages) Debug.Log("[SpeatchKit] Authorization");
-                    client.DefaultRequestHeaders.Add("Authorization", "Bearer " + iamToken);
-                    var values = new Dictionary<string, string>
-                    {
-                        { "text", TextToVoice },
-                        { "lang", Lang },
-                        { "folderId", FolderID },
-                        { "speed", Speed },
-                        { "emotion", Emotion },
-                        { "voice", Voice },
-                        { "format", "lpcm" },
-                        { "sampleRateHertz", "48000" }
-                    };
-                    var content = new FormUrlEncodedContent(values);
-                    if (showDebugMessages) Debug.Log("[SpeatchKit] Response...");
-                    var response = await client.PostAsync("https://tts.api.cloud.yandex.net/speech/v1/tts:synthesize", content);
-                    if (showDebugMessages) Debug.Log("[SpeatchKit] Content...");
-                    var responseBytes = await response.Content.ReadAsByteArrayAsync();
-                    if (showDebugMessages) Debug.Log("[SpeatchKit] Write file...");
+                    { "text", TextToVoice },
+                    { "lang", Lang },
+                    { "speed", Speed },
+                    { "emotion", Emotion },
+                    { "voice", Voice },
+                    { "format", Codec },
+                };
 
+                if (authMode == AuthMode.IAMToken) values.Add("folderId", FolderID);
+                if (codec == SPCodec.PCM) values.Add("sampleRateHertz", "48000");
+
+                var content = new FormUrlEncodedContent(values);
+
+                if (showDebugMessages) Debug.Log("[SpeatchKit] Response...");
+                var response = await client.PostAsync("https://tts.api.cloud.yandex.net/speech/v1/tts:synthesize", content);
+
+                if (showDebugMessages) Debug.Log("[SpeatchKit] Content...");
+                var responseBytes = await response.Content.ReadAsByteArrayAsync();
+
+                if (showDebugMessages) Debug.Log("[SpeatchKit] Precess data...");
+
+                if (storageMode == StorageMode.files)
+                {
                     string path = Path.Combine(Application.streamingAssetsPath, "SpeatchKit");
 
                     if (!Directory.Exists(path)) Directory.CreateDirectory(path);
@@ -94,44 +139,31 @@ namespace Obel.SpeechKitTool
                     try
                     {
                         File.WriteAllBytes(loadedFileName, responseBytes);
+                        onDoneFile.Invoke(loadedFileName);
                     }
                     catch
                     {
-                        if (showDebugMessages) Debug.LogWarning("[SpeatchKit] something wrong file writing!");
-                        errorResult = "file error";
+                        if (showDebugMessages) Debug.LogWarning("[SpeatchKit] something wrong with file writing!");
+                        onError.Invoke();
                     }
                 }
-                catch
+                else
                 {
-                    if (showDebugMessages) Debug.LogWarning("[SpeatchKit] something wrong with API!");
-                    errorResult = "API error";
+                    onDoneBytes.Invoke(responseBytes);
                 }
-                finally
-                {
-                    client.Dispose();
-                    if (showDebugMessages) Debug.Log("[SpeatchKit] Done.");
-                    doneResult = loadedFileName;
-                }
-            });
-        }
-
-
-        private void Update() => processResults();
-
-        private void processResults()
-        {
-            if (!string.IsNullOrEmpty(doneResult))
-            {
-                onDone.Invoke(doneResult);
-                doneResult = string.Empty;
             }
-
-            if (!string.IsNullOrEmpty(doneResult))
+            catch
             {
+                if (showDebugMessages) Debug.LogWarning("[SpeatchKit] something wrong with API!");
                 onError.Invoke();
-                errorResult = string.Empty;
+            }
+            finally
+            {
+                client.Dispose();
+                if (showDebugMessages) Debug.Log("[SpeatchKit] Done.");
             }
         }
 
+        #endregion
     }
 }

@@ -706,7 +706,7 @@ GameObject:
   - component: {fileID: 1878858058}
   - component: {fileID: 1878858056}
   m_Layer: 0
-  m_Name: SpeatchKit
+  m_Name: SpeechKit
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -724,14 +724,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e95159ca622b44b4dbafc22ce2011061, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  lang: 1
+  lang: 0
   voice: 0
   emotion: 0
   speed: 0
-  textToVoice: Hello world!
-  folderID: CREATE A YANDEX CLOUD FOLDER AND PAST HERE
-  iamToken: CREATE A YANDEX IAM TOKEN AND PASTE HERE
-  onDone:
+  codec: 0
+  textToVoice: Hallo world!
+  storageMode: 1
+  authMode: 1
+  authCode: PASTE API-Key OR IAM-Token HERE
+  folderID: PASTE FolderID here (only for IAM-Token)
+  onDoneFile:
+    m_PersistentCalls:
+      m_Calls: []
+  onDoneBytes:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1878858058}
@@ -764,7 +770,7 @@ AudioSource:
   m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
-  Loop: 1
+  Loop: 0
   Mute: 0
   Spatialize: 0
   SpatializePostEffects: 0
