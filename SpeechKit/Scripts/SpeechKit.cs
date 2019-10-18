@@ -26,9 +26,9 @@ namespace Obel.SpeechKitTool
         private string[] emotions = new string[] { "neutral", "evil", "good" };
         public string Emotion => emotions[(int)emotion];
 
-        public enum SPSpeed { normal, fast, fastest, slow, slowest }
+        public enum SPSpeed { x1, x1_15, x1_25, x1_5, x0_9, x0_8, x0_7, x0_6, x0_5  }
         [SerializeField] private SPSpeed speed;
-        private string[] speeds = new string[] { "1.0", "1.25", "1.5", "0.75", "0.5" };
+        private string[] speeds = new string[] { "1.0", "1.15", "1.25", "1.5", "0.9", "0.8", "0.7", "0.6", "0.5" };
         public string Speed => speeds[(int)speed];
 
         public enum SPCodec { PCM, opus }

@@ -725,15 +725,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   lang: 0
-  voice: 0
-  emotion: 0
-  speed: 0
+  voice: 2
+  emotion: 2
+  speed: 1
   codec: 0
-  textToVoice: Hallo world!
+  textToVoice: "\u0414\u043E\u0431\u0440\u044B\u0439 \u0434\u0435\u043D\u044C, \u0421\u0435\u0440\u0433\u0435\u0439
+    \u0421\u0435\u043C\u0451\u043D\u043E\u0432\u0438\u0447. \u041F\u0440\u0438\u0432\u0435\u0442\u0441\u0442\u0432\u0443\u044E
+    \u0432\u0430\u0441 \u043D\u0430 \u0444\u043E\u0440\u0443\u043C\u0435 \u043E\u0442\u043A\u0440\u044B\u0442\u044B\u0445
+    \u0438\u043D\u043D\u043E\u0432\u0430\u0446\u0438\u0439 2019!"
   storageMode: 1
   authMode: 1
-  authCode: PASTE API-Key OR IAM-Token HERE
-  folderID: PASTE FolderID here (only for IAM-Token)
+  authCode: AQVNxUa6t9NOGoAzU9RuRQ9_jfdStmaFC7PpiqF1
+  folderID: 
   onDoneFile:
     m_PersistentCalls:
       m_Calls: []
@@ -764,13 +767,13 @@ AudioSource:
   m_GameObject: {fileID: 1878858054}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 2601193776100142576, guid: 49d6d1377af5ed34c8b7c2a817932d53,
+  OutputAudioMixerGroup: {fileID: 5122730303105577202, guid: 56e897343cbd6ba4b9f22e60b797e984,
     type: 2}
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
-  Loop: 0
+  Loop: 1
   Mute: 0
   Spatialize: 0
   SpatializePostEffects: 0
