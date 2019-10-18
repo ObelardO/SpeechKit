@@ -724,19 +724,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e95159ca622b44b4dbafc22ce2011061, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  lang: 0
-  voice: 2
-  emotion: 2
-  speed: 1
+  lang: 1
+  voice: 0
+  emotion: 0
+  speed: 0
   codec: 0
-  textToVoice: "\u0414\u043E\u0431\u0440\u044B\u0439 \u0434\u0435\u043D\u044C, \u0421\u0435\u0440\u0433\u0435\u0439
-    \u0421\u0435\u043C\u0451\u043D\u043E\u0432\u0438\u0447. \u041F\u0440\u0438\u0432\u0435\u0442\u0441\u0442\u0432\u0443\u044E
-    \u0432\u0430\u0441 \u043D\u0430 \u0444\u043E\u0440\u0443\u043C\u0435 \u043E\u0442\u043A\u0440\u044B\u0442\u044B\u0445
-    \u0438\u043D\u043D\u043E\u0432\u0430\u0446\u0438\u0439 2019!"
+  textToVoice: Hello world!
   storageMode: 1
   authMode: 1
-  authCode: AQVNxUa6t9NOGoAzU9RuRQ9_jfdStmaFC7PpiqF1
-  folderID: 
+  authCode: Paste API-Key or IAM-Token
+  folderID: Paste ID for IAM-Token only
   onDoneFile:
     m_PersistentCalls:
       m_Calls: []
