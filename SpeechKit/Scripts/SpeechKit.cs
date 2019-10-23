@@ -26,9 +26,9 @@ namespace Obel.SpeechKitTool
         private string[] emotions = new string[] { "neutral", "evil", "good" };
         public string Emotion => emotions[(int)emotion];
 
-        public enum SPSpeed { x1, x1_15, x1_25, x1_5, x0_9, x0_8, x0_7, x0_6, x0_5  }
+        public enum SPSpeed { x1, x1_15, x1_25, x1_5, x2_0, x0_9, x0_8, x0_7, x0_6, x0_5  }
         [SerializeField] private SPSpeed speed;
-        private string[] speeds = new string[] { "1.0", "1.15", "1.25", "1.5", "0.9", "0.8", "0.7", "0.6", "0.5" };
+        private string[] speeds = new string[] { "1.0", "1.15", "1.25", "1.5", "2.0", "0.9", "0.8", "0.7", "0.6", "0.5" };
         public string Speed => speeds[(int)speed];
 
         public enum SPCodec { PCM, opus }
@@ -85,15 +85,17 @@ namespace Obel.SpeechKitTool
 
         #region Public methods
 
-        public void TryToSpeak() => Speech();
+        public void TryToSpeak(string fileName) => Speech(fileName);
+
+        public void TryToSpeak() => Speech(null);
 
         #endregion
 
         #region Private methods
 
-        private async void Speech()
+        private async void Speech(string fileName)
         {
-            if (showDebugMessages) Debug.Log("[SpeatchKit] Try to speak: " + TextToVoice);
+            if (showDebugMessages) Debug.Log("[SpeechKit] Try to speak: " + TextToVoice + " File: " + fileName);
 
             string loadedFileName = "";
 
@@ -101,7 +103,7 @@ namespace Obel.SpeechKitTool
 
             try
             {
-                if (showDebugMessages) Debug.Log("[SpeatchKit] Authorization");
+                if (showDebugMessages) Debug.Log("[SpeechKit] Authorization");
 
                 client.DefaultRequestHeaders.Add("Authorization", (authMode == AuthMode.APIKey ? "Api-Key " : "Bearer ") + AuthCode);
 
@@ -120,30 +122,32 @@ namespace Obel.SpeechKitTool
 
                 var content = new FormUrlEncodedContent(values);
 
-                if (showDebugMessages) Debug.Log("[SpeatchKit] Response...");
+                if (showDebugMessages) Debug.Log("[SpeechKit] Response...");
                 var response = await client.PostAsync("https://tts.api.cloud.yandex.net/speech/v1/tts:synthesize", content);
 
-                if (showDebugMessages) Debug.Log("[SpeatchKit] Content...");
+                if (showDebugMessages) Debug.Log("[SpeechKit] Content...");
                 var responseBytes = await response.Content.ReadAsByteArrayAsync();
 
-                if (showDebugMessages) Debug.Log("[SpeatchKit] Precess data...");
+                if (showDebugMessages) Debug.Log("[SpeechKit] Precess data...");
 
                 if (storageMode == StorageMode.files)
                 {
-                    string path = Path.Combine(Application.streamingAssetsPath, "SpeatchKit");
+                    string path = Path.Combine(Application.streamingAssetsPath, "SpeechKit");
 
                     if (!Directory.Exists(path)) Directory.CreateDirectory(path);
 
-                    loadedFileName = Path.Combine(path, $"[{DateTime.Now.ToString().Replace(":", ".").Replace(" ", "_")}][{lang}][{voice}][{emotion}][{speed}].ogg");
+                    if (string.IsNullOrEmpty(fileName)) fileName = $"[{DateTime.Now.ToString().Replace(":", ".").Replace(" ", "_")}][{lang}][{voice}][{emotion}][{speed}].ogg";
 
                     try
                     {
+                        loadedFileName = Path.Combine(path, fileName);
+                        if (showDebugMessages) Debug.Log("[SpeechKit] FILE: " + loadedFileName);
                         File.WriteAllBytes(loadedFileName, responseBytes);
                         onDoneFile.Invoke(loadedFileName);
                     }
                     catch
                     {
-                        if (showDebugMessages) Debug.LogWarning("[SpeatchKit] something wrong with file writing!");
+                        if (showDebugMessages) Debug.LogWarning("[SpeechKit] something wrong with file writing!");
                         onError.Invoke();
                     }
                 }
@@ -154,13 +158,13 @@ namespace Obel.SpeechKitTool
             }
             catch
             {
-                if (showDebugMessages) Debug.LogWarning("[SpeatchKit] something wrong with API!");
+                if (showDebugMessages) Debug.LogWarning("[SpeechKit] something wrong with API!");
                 onError.Invoke();
             }
             finally
             {
                 client.Dispose();
-                if (showDebugMessages) Debug.Log("[SpeatchKit] Done.");
+                if (showDebugMessages) Debug.Log("[SpeechKit] Done.");
             }
         }
 
